@@ -1,15 +1,15 @@
 // Function to contain all other functions
 function initiatePlanner() {
-   
+
     function currentDateHour() {
-    
-        // Gets current time and date from Moment.js
+
+        // Get current time and date from Moment.js
         const momentObj = moment();
-       
+
         const currentDate = momentObj.format("dddd, MMMM Do");
-       
+
         const currentHour = momentObj.format("k");
-      
+
         const current = {
             date: currentDate,
             hour: currentHour
@@ -17,50 +17,53 @@ function initiatePlanner() {
         // Used so that when the function is called the value it returns is the object current.
         return current;
     }
-    
+
     // Update header to show current date
-    function showCurrentDate(){
+    function showCurrentDate() {
         const DateHour = currentDateHour();
         const currentDayEl = document.getElementById('currentDay');
-        currentDayEl.innerText = DateHour.date;  
+        currentDayEl.innerText = DateHour.date;
     }
     showCurrentDate();
 
-    
+
     // Checks if the user has created and stored any activites previously. If user has created activities, the activities are returned.
-    function checkLocalStorage(){
+    function checkLocalStorage() {
         // Defines a variable to store existing activities
         let existingHours = [];
-        
-        if(localStorage.getItem('existingHours')){
+
+        if (localStorage.getItem('existingHours')) {
             const hoursStringified = localStorage.getItem('existingHours');
+
             // Transforms stringified data into an object
             existingHours = JSON.parse(hoursStringified);
+
             // Get date of existing data
             const existingDate = existingHours[0].date;
+
             // Get current date
             const currentDate = currentDateHour().date;
-            // Compare current date and the date of the existing data. If they are equal, the data is used for rendering the calendar, if not the data is not used.
-            if (currentDate === existingDate){
-                // returns the object existingActivities, which contains any activities the user created for that date.
+
+
+            if (currentDate === existingDate) {
                 return existingHours;
             }
-            else{
-                return false;
-            };
-        }   
             else {
                 return false;
+            };
+        }
+        else {
+            return false;
         };
     };
-    
+
     // Creates an array that will be used to render the calendar.
     function createHoursArray() {
-        
+
         // Creates an array that will store either existing activities or a blank set of activities used to fill out the calendar
         const hours = [];
-       // -- i starts at 9 and ends at 17 to create the hours 9am - 5pm
-        for(let i=9; i <= 17; i++){
+        // -- i starts at 9 and ends at 17 to create the hours 9am - 5pm
+        for (let i = 9; i <= 17; i++) {
             let t = moment(i, "H").format("h:mm A");
             let singleHour = {
                 date: currentDateHour().date,
@@ -71,59 +74,60 @@ function initiatePlanner() {
             // Adds the hour object to the array
             hours.push(singleHour);
         };
-  
+
         // Returns array of hours, which contains an object per hour for the hours of 9AM to 5PM
         return hours;
     };
-    function renderCalendar(){
+    function renderCalendar() {
+
+        let hours = [];
         
-        let hours=[];
-        // If hours already exist for the current date, they will be stored in the variable hours. If not, an hours array with no activities will be created.
         let check = checkLocalStorage();
 
-        if (check){
+        if (check) {
             hours = checkLocalStorage();
         } else {
             hours = createHoursArray();
         };
 
         // Creates each row of the calendar
-        for(i=0; i < hours.length; i++){
-            
+        for (i = 0; i < hours.length; i++) {
+
             const rowEl = document.createElement('row');
             rowEl.classList.add('row');
-           
+
             const colEl1 = document.createElement('div');
             colEl1.classList.add('time-block', 'hour', 'col-2', 'p-0');
-            
+
             const colEl2 = document.createElement('div');
             colEl2.classList.add('description', 'col-9', 'p-0');
-          
+
             const colEl3 = document.createElement('div');
             colEl3.classList.add('button-column', 'col-1', 'p-0');
-           
+
             const saveButton = document.createElement('button');
-          
+
             saveButton.classList.add('far', 'fa-save', 'saveBtn');
-         
+
             const activityInput = document.createElement('input');
             activityInput.classList.add('description')
+
+            // Styles : Past is grey, present is white, future is green
             
-            // Styles inputs based on time of day. Past is gray, present is white, future is green
-            if(hours[i].time < moment().format("k")){
+            if (hours[i].time < moment().format("k")) {
                 activityInput.classList.add('past')
             }
-            if(hours[i].time === moment().format("k")){
+            if (hours[i].time === moment().format("k")) {
                 activityInput.classList.add('present')
             }
-            if(hours[i].time > moment().format("k")){
+            if (hours[i].time > moment().format("k")) {
                 activityInput.classList.add('future')
             }
-            
+
             // Creates a unique id for each input. Used later for button event listener
-            activityInput.setAttribute("id","input-"+(i));
-       
-            saveButton.setAttribute("id", "button-"+(i));
+            activityInput.setAttribute("id", "input-" + (i));
+
+            saveButton.setAttribute("id", "button-" + (i));
             // updates inner text of column 1 to display the time for that row
             colEl1.innerText = hours[i].stringTime;
             // appends input to column 2
@@ -134,20 +138,20 @@ function initiatePlanner() {
             activityInput.value = hours[i].activity;
             // appends all three columns to the row
             rowEl.append(colEl1, colEl2, colEl3);
-           
-            
+
+
             const containerEl = document.querySelector('.container');
             containerEl.append(rowEl);
             containerEl.classList.add('mx-auto')
 
             // When a save button is clicked, the text in the corresponding input is saved to local storage
-            saveButton.addEventListener('click', function(){ 
-             
-                const hourInput = event.target.id.replace('button-','input-');
-                const hoursIndex = event.target.id.replace('button-','');
+            saveButton.addEventListener('click', function () {
+
+                const hourInput = event.target.id.replace('button-', 'input-');
+                const hoursIndex = event.target.id.replace('button-', '');
                 hours[hoursIndex].activity = document.getElementById(hourInput).value;
-                const hoursStringified = JSON.stringify(hours); 
-                
+                const hoursStringified = JSON.stringify(hours);
+
                 localStorage.setItem('existingHours', hoursStringified);
 
             });
@@ -155,21 +159,21 @@ function initiatePlanner() {
     };
     renderCalendar();
 
-    function hourFormatSwitch(){
+    function hourFormatSwitch() {
         let hourSwitchbtnEl = document.getElementById('hour-switch');
-        
-        hourSwitchbtnEl.addEventListener('click', function(){
-            
-            console.log('switch button clicked',hourSwitchbtnEl.innerText);
+
+        hourSwitchbtnEl.addEventListener('click', function () {
+
+            console.log('switch button clicked', hourSwitchbtnEl.innerText);
             const timeArray = createHoursArray();
-            if(hourSwitchbtnEl.innerText === "24H"){
-                
+            if (hourSwitchbtnEl.innerText === "24H") {
+
                 hourSwitchbtnEl.innerText = "12H";
                 const hourTexts = document.querySelectorAll(".hour");
-                
-                for(let i=0; i < timeArray.length; i++){
+
+                for (let i = 0; i < timeArray.length; i++) {
                     hTime = timeArray[i].time;
-                   
+
                     hhTime = moment(hTime, "H").format("HHmm");
                     hourTexts[i].innerText = hhTime;
 
@@ -178,14 +182,14 @@ function initiatePlanner() {
             } else {
                 hourSwitchbtnEl.innerText = "24H";
                 const hourTexts = document.querySelectorAll(".hour");
-               
-                for(let i=0; i < timeArray.length; i++){
+
+                for (let i = 0; i < timeArray.length; i++) {
                     backTime = timeArray[i].stringTime;
-                    
+
                     hourTexts[i].innerText = backTime;
 
                 }
-            }; 
+            };
         });
     }
     hourFormatSwitch();
